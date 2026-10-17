@@ -49,16 +49,21 @@ namespace ProductsValidation.Controllers
         [HttpPost]
         public IActionResult Edit(Product product)
         {
+            if (!ModelState.IsValid)
+                return View(product);
+
             myProducts[myProducts.FindIndex(prod => prod.Id == product.Id)] = product;
-            return View(product);
+            return RedirectToAction("View", new { id = product.Id });
         }
 
         
         [HttpPost]
         public IActionResult Create(Product product)
         {
+            if (!ModelState.IsValid)
+                return View(product);
             myProducts.Add(product);
-            return View("View", product);
+            return RedirectToAction("View", new { id = product.Id });
         }
 
         public IActionResult Create()
@@ -75,6 +80,36 @@ namespace ProductsValidation.Controllers
         public IActionResult Error()
         {
             return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
+        }
+        [HttpGet]
+        public IActionResult EditPrices(Product.Category category)
+        {
+            var model = myProducts
+                .Where(p => p.Type == category)
+                .Select(p => new ProductPriceViewModel { Id = p.Id, Name = p.Name, Price = p.Price })
+                .ToList();
+
+            ViewBag.Category = category;
+            return View(model);
+        }
+
+        [HttpPost]
+        public IActionResult EditPrices(Product.Category category, List<ProductPriceViewModel> prices)
+        {
+            if (!ModelState.IsValid)
+            {
+                ViewBag.Category = category;
+                return View(prices);
+            }
+
+            foreach (var item in prices)
+            {
+                var product = myProducts.Find(p => p.Id == item.Id);
+                if (product != null)
+                    product.Price = item.Price;
+            }
+
+            return RedirectToAction("Index");
         }
     }
 }

@@ -9,6 +9,14 @@
 <p>
     <a asp-action="Create">Create New</a>
 </p>
+<p>
+    Edit prices of category:
+    @foreach (var category in Enum.GetValues(typeof(ProductsValidation.Models.Product.Category)))
+    {
+        <a asp-action="EditPrices" asp-route-category="@category">@category</a>
+        <text> | </text>
+    }
+</p>
 <table class="table">
     <thead>
         <tr>
